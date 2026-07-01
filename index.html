@@ -461,7 +461,7 @@
         container.innerHTML = "";
         navLinks.innerHTML = "";
 
-        let sortedKeys = Object.keys(spieltageMap).sort((a, b) => parseInt(a) - parseInt(b));
+        let sortedKeys = Object.keys(spieltageMap).sort((a, b) => parseInt(b) - parseInt(a));
 
         sortedKeys.forEach(key => {
             let st = spieltageMap[key];
