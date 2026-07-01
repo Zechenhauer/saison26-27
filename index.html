@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Saisonübersicht 3. Mannschaft — TV Kapellen 1919 e.V.</title>
+    <style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #0f172a;
+        color: #f1f5f9;
+        margin: 0;
+        padding: 40px 20px;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .search-wrapper {
+        position: sticky;
+        top: 15px;
+        z-index: 100;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: center;
+    }
+    .search-box-input {
+        width: 100%;
+        max-width: 500px;
+        padding: 14px 20px;
+        font-size: 15px;
+        background-color: #1e293b;
+        color: #ffffff;
+        border: 2px solid #f59e0b;
+        border-radius: 30px;
+        outline: none;
+        box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+        transition: all 0.3s ease;
+    }
+    .search-box-input:focus {
+        box-shadow: 0 4px 25px rgba(245, 158, 11, 0.45);
+        transform: scale(1.02);
+    }
+    .premium-highlight-card {
+        background-color: #1e293b;
+        border: 3px solid #f59e0b;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 50px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+    .highlight-header {
+        text-align: center;
+        border-bottom: 2px solid #f59e0b;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    .highlight-header h1 {
+        color: #f59e0b;
+        margin: 0;
+        font-size: 26px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .highlight-header p {
+        color: #10b981;
+        margin: 6px 0 0 0;
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .highlight-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .highlight-table th {
+        background-color: #334155;
+        color: #cbd5e1;
+        text-align: left;
+        padding: 12px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .highlight-table td {
+        padding: 12px;
+        border-bottom: 1px solid #334155;
+        font-size: 14px;
+    }
+    .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 30px;
+        justify-content: center;
+        background: #1e293b;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #334155;
+    }
+    .nav-links a {
+        color: #cbd5e1;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        padding: 6px 12px;
+        background: #0f172a;
+        border-radius: 6px;
+        border: 1px solid #334155;
+        transition: all 0.2s;
+    }
+    .nav-links a:hover {
+        color: #f59e0b;
+        border-color: #f59e0b;
+    }
+    .card {
+        background: #1e293b;
+        border: 2px solid #334155;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 50px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .card-header h3 {
+        margin: 0;
+        color: #f59e0b;
+        font-size: 24px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .block-title {
+        background: #0f172a;
+        color: #f59e0b;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-left: 4px solid #10b981;
+        border-radius: 0 6px 6px 0;
+        margin: 25px 0 12px 0;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+    th {
+        background: #24334a;
+        color: #94a3b8;
+        font-size: 11px;
+        text-transform: uppercase;
+        padding: 10px 12px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+    }
+    td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #334155;
+        vertical-align: middle;
+    }
+    .p-name { font-weight: bold; color: #ffffff; }
+    .opp-name { color: #cbd5e1; }
+    .score-box {
+        display: inline-block;
+        font-weight: bold;
+        padding: 3px 8px;
+        border-radius: 4px;
+        background: #0f172a;
+        font-family: monospace;
+        font-size: 14px;
+    }
+    .score-box.win-highlight { color: #4ade80; background-color: rgba(74, 222, 128, 0.15); border: 1px solid #22c55e; }
+    .score-box.loss-highlight { color: #f87171; background-color: rgba(248, 113, 113, 0.15); border: 1px solid #ef4444; }
+    .win-row { border-right: 4px solid #10b981; }
+    .loss-row { border-right: 4px solid #ef4444; }
+    .avg-val { color: #f59e0b; font-weight: bold; }
+    .darts-val { color: #94a3b8; font-size: 13px; }
+    .hl-txt { color: #ec4899; font-weight: bold; }
+    .highlights-summary-box {
+        border: 2px dashed #f59e0b;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 25px;
+        background: #151f32;
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+    }
+    .summary-item { flex: 1; }
+    .summary-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #94a3b8;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+    }
+    .summary-value { font-size: 18px; font-weight: bold; margin-top: 5px; }
+    .summary-value.green { color: #10b981; }
+    .summary-value.pink { color: #ec4899; }
+    .summary-value.gold { color: #f59e0b; }
+    .row-faded {
+        opacity: 0.15;
+        filter: grayscale(80%);
+    }
+    .row-matched {
+        background-color: rgba(245, 158, 11, 0.08) !important;
+    }
+    .loading-status {
+        text-align: center;
+        color: #f59e0b;
+        font-size: 16px;
+        margin: 20px;
+        font-weight: bold;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #ffffff; text-transform: uppercase; font-size: 14px; font-weight: bold; letter-spacing: 3px; margin-bottom: 5px; color: #94a3b8;">TV KAPELLEN 1919 e.V.</h1>
+        <h2 style="text-align: center; color: #f59e0b; text-transform: uppercase; font-size: 32px; font-weight: 900; letter-spacing: 1px; margin: 0 0 30px 0;">Saisonübersicht &mdash; 3. Mannschaft</h2>
+        
+        <!-- Live-Suche -->
+        <div class="search-wrapper">
+            <input type="text" id="playerSearchInput" class="search-box-input" placeholder="🔍 Nach Spieler-Name suchen (z.B. Lenz)..." oninput="performLiveSearch()">
+        </div>
+
+        <div id="loadingMessage" class="loading-status">Lade Spieldaten aus Google Sheets...</div>
+
+        <!-- Highlights Tabelle -->
+        <div class="premium-highlight-card" id="highlightsCard" style="display:none;">
+            <div class="highlight-header">
+                <h1>🏆 SAISON-HIGHLIGHTS (SHORT LEGS, 180er & HIGH FINISHES)</h1>
+                <p>Übersicht aller Bestleistungen — 3. Mannschaft</p>
+            </div>
+            <table class="highlight-table">
+                <thead>
+                    <tr>
+                        <th style="width: 8%; text-align: center;">Platz</th>
+                        <th style="width: 32%;">Spieler</th>
+                        <th style="width: 16%; text-align: center;">🎯 Short Games</th>
+                        <th style="width: 16%; text-align: center;">🎯 180er</th>
+                        <th style="width: 18%;">🔥 High Finishes (alle)</th>
+                        <th style="width: 10%; text-align: center;">Top Finish</th>
+                    </tr>
+                </thead>
+                <tbody id="highlightsTableBody">
+                    <!-- Wird dynamisch geladen -->
+                </tbody>
+            </table>
+        </div>
+
+        <h2 id="matchdaysHeading" style="color: #ffffff; text-transform: uppercase; font-size: 16px; letter-spacing: 1px; margin: 40px 0 20px 0; border-left: 4px solid #f59e0b; padding-left: 10px; display:none;">📅 Alle Spieltage in der Detailansicht</h2>
+        
+        <!-- Navigation -->
+        <div class="nav-links" id="navLinks" style="display:none;">
+            <!-- Wird dynamisch erzeugt basierend auf vorhandenen Spieltagen -->
+        </div>
+
+        <!-- Spieltage Container -->
+        <div id="spieltageContainer"></div>
+    </div>
+
+    <!-- JavaScript für Google Sheets Integration & Live-Suche -->
+    <script>
+    // HIER DEINE GOOGLE SHEETS CSV URL EINTRAGEN:
+    const SHEETS_CSV_URL = "HIER_DEINE_GOOGLE_SHEETS_CSV_URL_EINTRAGEN";
+
+    // Kaderliste für die automatische Zuordnung (Kleingeschrieben für die Suche)
+    const teamKader = [
+        "Jürgen Schützendorf", "Ludger Schledorn", "Markus Lenz", 
+        "Niklas Weichert", "Andreas Denner", "Markus Ginsel", 
+        "Dominik Helmke", "Michael Müller", "Florian Hartwich", "Thomas Kliver"
+    ];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (SHEETS_CSV_URL === "HIER_DEINE_GOOGLE_SHEETS_CSV_URL_EINTRAGEN") {
+            document.getElementById("loadingMessage").innerHTML = "⚠️ Bitte trage zuerst deine Google Sheets CSV-URL im HTML-Code ein!";
+            return;
+        }
+        loadDataFromSheets();
+    });
+
+    async function loadDataFromSheets() {
+        try {
+            const response = await fetch(SHEETS_CSV_URL);
+            const dataText = await response.text();
+            const rows = parseCSV(dataText);
+            
+            if(rows.length <= 1) {
+                document.getElementById("loadingMessage").innerHTML = " Keine Daten im Google Sheet gefunden.";
+                return;
+            }
+
+            processDartsData(rows);
+        } catch (error) {
+            console.error(error);
+            document.getElementById("loadingMessage").innerHTML = "⚠️ Fehler beim Laden der Google Sheets Daten. Überprüfe die Freigabe.";
+        }
+    }
+
+    // Robuster CSV Parser (behandelt Anführungszeichen korrekt)
+    function parseCSV(text) {
+        let lines = text.split(/\r?\n/);
+        return lines.map(line => {
+            let result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                let char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }).filter(r => r.length > 1 && r[0] !== "");
+    }
+
+    function processDartsData(rows) {
+        // Headers überspringen
+        const dataRows = rows.slice(1);
+
+        // Datenstrukturen vorbereiten
+        let spieltageMap = {};
+        let spielerStats = {};
+        
+        teamKader.forEach(p => {
+            spielerStats[p] = { shortGames: 0, hunderteachtziger: 0, highFinishes: [], topFinish: 0 };
+        });
+
+        // Zeilen verarbeiten
+        dataRows.forEach(row => {
+            // Spaltenzuordnung laut Tabellenvorlage:
+            // 0: Spieltag, 1: Datum, 2: Gegner Mannschaft, 3: Endergebnis, 
+            // 4: Block, 5: Spieler Kapellen, 6: Gegner Name, 7: Ergebnis Spiel, 
+            // 8: Avg, 9: Darts, 10: SG, 11: 180er, 12: HF
+            
+            const spieltagNum = row[0];
+            const datum = row[1];
+            const gegnerTeam = row[2];
+            const endergebnis = row[3];
+            const blockName = row[4];
+            const spielerKapellen = row[5];
+            const gegnerName = row[6];
+            const ergebnisSpiel = row[7];
+            const avg = row[8];
+            const darts = row[9];
+            const sgCount = parseInt(row[10]) || 0;
+            const hunderteachtzigerCount = parseInt(row[11]) || 0;
+            const hfString = row[12] || "";
+
+            if (!spieltagNum) return;
+
+            // 1. Spieltag-Struktur anlegen falls nicht existent
+            if (!spieltageMap[spieltagNum]) {
+                spieltageMap[spieltagNum] = {
+                    nummer: spieltagNum,
+                    datum: datum,
+                    gegnerTeam: gegnerTeam,
+                    endergebnis: endergebnis,
+                    bloecke: {},
+                    alleSpieler: new Set(),
+                    sgGesamt: 0,
+                    achtzigerGesamt: 0,
+                    topFinish: 0
+                };
+            }
+
+            let st = spieltageMap[spieltagNum];
+            if (!st.bloecke[blockName]) st.bloecke[blockName] = [];
+
+            // Zeile zum Block hinzufügen
+            st.bloecke[blockName].push({
+                spieler: spielerKapellen,
+                gegner: gegnerName,
+                ergebnis: ergebnisSpiel,
+                avg: avg,
+                darts: darts,
+                highlights: [
+                    sgCount > 0 ? `${sgCount}x SG` : "",
+                    hunderteachtzigerCount > 0 ? `${hunderteachtzigerCount}x 180` : "",
+                    hfString ? `HF ${hfString}` : ""
+                ].filter(Boolean).join(", ") || "—"
+            });
+
+            // Spieler für die Filterung erfassen (Sowohl Einzel- als auch Kombi-Namen bei Doppel auflösen)
+            spielerKapellen.split("/").forEach(subP => {
+                let cleanName = subP.trim();
+                if(cleanName) st.alleSpieler.add(cleanName.toLowerCase());
+                
+                // Globale Spieler-Highlights aktualisieren, falls im Kader
+                let matchedKaderName = teamKader.find(tk => tk.toLowerCase() === cleanName.toLowerCase());
+                if (matchedKaderName) {
+                    spielerStats[matchedKaderName].shortGames += sgCount;
+                    spielerStats[matchedKaderName].hunderteachtziger += hunderteachtzigerCount;
+                    if (hfString) {
+                        hfString.split(",").forEach(f => {
+                            let fNum = parseInt(f.trim());
+                            if (fNum) {
+                                spielerStats[matchedKaderName].highFinishes.push(fNum);
+                                if (fNum > spielerStats[matchedKaderName].topFinish) {
+                                    spielerStats[matchedKaderName].topFinish = fNum;
+                                }
+                                if (fNum > st.topFinish) st.topFinish = fNum;
+                            }
+                        });
+                    }
+                }
+            });
+
+            st.sgGesamt += sgCount;
+            st.achtzigerGesamt += hunderteachtzigerCount;
+        });
+
+        // Highlights-Tabelle oben rendern
+        renderHighlightsTable(spielerStats);
+
+        // Spieltage rendern
+        renderMatchdays(spieltageMap);
+
+        // UI Elemente einblenden, Lade-Info ausblenden
+        document.getElementById("loadingMessage").style.display = "none";
+        document.getElementById("highlightsCard").style.display = "block";
+        document.getElementById("matchdaysHeading").style.display = "block";
+        document.getElementById("navLinks").style.display = "flex";
+    }
+
+    function renderHighlightsTable(stats) {
+        let sortedPlayers = teamKader.map(name => {
+            return { name: name, ...stats[name] };
+        }).sort((a, b) => {
+            // Sortierung: Meiste Short Games, dann meiste 180er, dann höchstes Finish
+            if (b.shortGames !== a.shortGames) return b.shortGames - a.shortGames;
+            if (b.hunderteachtziger !== a.hunderteachtziger) return b.hunderteachtziger - a.hunderteachtziger;
+            return b.topFinish - a.topFinish;
+        });
+
+        let tbody = document.getElementById("highlightsTableBody");
+        tbody.innerHTML = "";
+        
+        sortedPlayers.forEach((p, idx) => {
+            let hfListText = p.highFinishes.length > 0 ? p.highFinishes.sort((a,b)=>b-a).join(", ") : "—";
+            let topFinText = p.topFinish > 0 ? p.topFinish : "—";
+
+            let rowHtml = `
+                <tr class="hl-player-row" data-player-name="${p.name.toLowerCase()}">
+                    <td style="text-align: center; font-weight: bold; color: #f59e0b;">${idx + 1}</td>
+                    <td style="font-weight: bold; color: #ffffff;">${p.name}</td>
+                    <td style="text-align: center; color: #10b981; font-weight: bold;">${p.shortGames}x</td>
+                    <td style="text-align: center; color: #f59e0b; font-weight: bold;">${p.hunderteachtziger}x</td>
+                    <td style="color: #ec4899; font-weight: bold;">${hfListText}</td>
+                    <td style="text-align: center;"><span style="color: #ffffff; font-weight: bold; background-color: #ec4899; padding: 2px 8px; border-radius: 4px;">${topFinText}</span></td>
+                </tr>
+            `;
+            tbody.innerHTML += rowHtml;
+        });
+    }
+
+    function renderMatchdays(spieltageMap) {
+        let container = document.getElementById("spieltageContainer");
+        let navLinks = document.getElementById("navLinks");
+        container.innerHTML = "";
+        navLinks.innerHTML = "";
+
+        // Sortiert nach Spieltag-Nummer ausgeben
+        let sortedKeys = Object.keys(spieltageMap).sort((a, b) => parseInt(a) - parseInt(b));
+
+        sortedKeys.forEach(key => {
+            let st = spieltageMap[key];
+            
+            // Navigationslink hinzufügen
+            navLinks.innerHTML += `<a href="#spieltag-${st.nummer}">Spieltag ${st.nummer}</a>`;
+
+            let playersDataAttr = Array.from(st.alleSpieler).join("||");
+
+            let cardHtml = `
+                <div class="card" id="spieltag-${st.nummer}" data-players="${playersDataAttr}">
+                    <div class="card-header" style="text-align: center;">
+                        <h3>SPIELTAG ${st.nummer}</h3>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap; margin: 8px 0;">
+                            <span style="font-size: 19px; color: #ffffff; font-weight: bold;">TV Kapellen 3 &nbsp;vs.&nbsp; ${st.gegnerTeam}</span>
+                            <span class="score-badge-main" style="background-color: #f59e0b; color: #0f172a; font-weight: 800; font-size: 18px; padding: 3px 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(245,158,11,0.3);">${st.endergebnis}</span>
+                        </div>
+                        <div style="color: #94a3b8; font-size: 13px;">Datum: ${st.datum}</div>
+                    </div>
+            `;
+
+            // Blöcke dynamisch rendern
+            Object.keys(st.bloecke).forEach(blockTitle => {
+                cardHtml += `
+                    <div class="block-title">${blockTitle}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 28%;">Spieler (Kapellen)</th>
+                                <th style="width: 26%;">Gegner</th>
+                                <th style="width: 12%; text-align: center;">Ergebnis</th>
+                                <th style="width: 14%; text-align: center;">3-Dart Avg</th>
+                                <th style="width: 12%; text-align: center;">Darts (L1|L2|L3)</th>
+                                <th style="width: 8%; text-align: center;">Highlights</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                st.bloecke[blockTitle].forEach(match => {
+                    // Erkennung ob gewonnen oder verloren für Zeilen-Farbklasse
+                    let rowClass = "";
+                    let scoreClass = "score-box";
+                    
+                    if (match.ergebnis.includes(":")) {
+                        let parts = match.ergebnis.split(":");
+                        let left = parseInt(parts[0].trim());
+                        let right = parseInt(parts[1].trim());
+                        if (left > right) {
+                            rowClass = "win-row";
+                            scoreClass += " win-highlight";
+                        } else if (left < right) {
+                            rowClass = "loss-row";
+                            scoreClass += " loss-highlight";
+                        }
+                    }
+
+                    // Attribute für Live-Suche präparieren
+                    let searchRowPlayers = match.spieler.split("/").map(s => s.trim().toLowerCase()).join("||");
+
+                    cardHtml += `
+                        <tr class="${rowClass}" data-row-players="${searchRowPlayers}">
+                            <td class="p-name">${match.spieler.replace("/", " /<br>")}</td>
+                            <td class="opp-name">${match.gegner.replace("/", " /<br>")}</td>
+                            <td style="text-align: center;"><span class="${scoreClass}">${match.ergebnis}</span></td>
+                            <td style="text-align: center;" class="avg-val">${match.avg || "—"}</td>
+                            <td style="text-align: center;" class="darts-val">${match.darts || "-|-|-"}</td>
+                            <td style="text-align: center;">${match.highlights}</td>
+                        </tr>
+                    `;
+                });
+
+                cardHtml += `</tbody></table>`;
+            });
+
+            // Summary-Box am Ende der Card anhängen
+            let topFinText = st.topFinish > 0 ? st.topFinish : "—";
+            cardHtml += `
+                    <div class="highlights-summary-box">
+                        <div class="summary-item">
+                            <div class="summary-label">Short Games Gesamt</div>
+                            <div class="summary-value green">${st.sgGesamt}x</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Höchstes High Finish</div>
+                            <div class="summary-value pink">${topFinText}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">180er Gesamt</div>
+                            <div class="summary-value gold">${st.achtzigerGesamt}x</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML += cardHtml;
+        });
+    }
+
+    // Unveränderte, performante Live-Suchfunktion
+    function performLiveSearch() {
+        const query = document.getElementById('playerSearchInput').value.toLowerCase().trim();
+        
+        // 1. Suche in Highlight-Tabelle
+        const hlRows = document.querySelectorAll('.hl-player-row');
+        hlRows.forEach(row => {
+            const name = row.getAttribute('data-player-name') || '';
+            if (query === '') {
+                row.classList.remove('row-faded', 'row-matched');
+            } else if (name.includes(query)) {
+                row.classList.add('row-matched');
+                row.classList.remove('row-faded');
+            } else {
+                row.classList.add('row-faded');
+                row.classList.remove('row-matched');
+            }
+        });
+
+        // 2. Suche in Spieltag-Cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const cardPlayers = card.getAttribute('data-players') || '';
+            
+            if (query === '') {
+                card.style.display = 'block';
+                const rows = card.querySelectorAll('tbody tr');
+                rows.forEach(r => r.classList.remove('row-faded', 'row-matched'));
+                return;
+            }
+
+            if (cardPlayers.includes(query)) {
+                card.style.display = 'block';
+                const rows = card.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const rowPlayers = row.getAttribute('data-row-players') || '';
+                    if (rowPlayers.includes(query)) {
+                        row.classList.add('row-matched');
+                        row.classList.remove('row-faded');
+                    } else {
+                        row.classList.add('row-faded');
+                        row.classList.remove('row-matched');
+                    }
+                });
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    </script>
+</body>
+</html>
