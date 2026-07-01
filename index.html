@@ -222,14 +222,12 @@
         <h1 style="text-align: center; color: #ffffff; text-transform: uppercase; font-size: 14px; font-weight: bold; letter-spacing: 3px; margin-bottom: 5px; color: #94a3b8;">TV KAPELLEN 1919 e.V.</h1>
         <h2 style="text-align: center; color: #f59e0b; text-transform: uppercase; font-size: 32px; font-weight: 900; letter-spacing: 1px; margin: 0 0 30px 0;">Saisonübersicht &mdash; 3. Mannschaft</h2>
         
-        <!-- Live-Suche -->
         <div class="search-wrapper">
             <input type="text" id="playerSearchInput" class="search-box-input" placeholder="🔍 Nach Spieler-Name suchen (z.B. Lenz)..." oninput="performLiveSearch()">
         </div>
 
         <div id="loadingMessage" class="loading-status">Lade Spieldaten aus Google Sheets...</div>
 
-        <!-- Highlights Tabelle -->
         <div class="premium-highlight-card" id="highlightsCard" style="display:none;">
             <div class="highlight-header">
                 <h1>🏆 SAISON-HIGHLIGHTS (SHORT LEGS, 180er & HIGH FINISHES)</h1>
@@ -247,28 +245,22 @@
                     </tr>
                 </thead>
                 <tbody id="highlightsTableBody">
-                    <!-- Wird dynamisch geladen -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
         <h2 id="matchdaysHeading" style="color: #ffffff; text-transform: uppercase; font-size: 16px; letter-spacing: 1px; margin: 40px 0 20px 0; border-left: 4px solid #f59e0b; padding-left: 10px; display:none;">📅 Alle Spieltage in der Detailansicht</h2>
         
-        <!-- Navigation -->
         <div class="nav-links" id="navLinks" style="display:none;">
-            <!-- Wird dynamisch erzeugt basierend auf vorhandenen Spieltagen -->
-        </div>
+            </div>
 
-        <!-- Spieltage Container -->
         <div id="spieltageContainer"></div>
     </div>
 
-    <!-- JavaScript für Google Sheets Integration & Live-Suche -->
     <script>
-    // HIER DEINE GOOGLE SHEETS CSV URL EINTRAGEN:
-    const SHEETS_CSV_URL = "HIER_DEINE_GOOGLE_SHEETS_CSV_URL_EINTRAGEN";
+    // DEIN GOOGLE SHEETS LINK (INKLUSIVE TRENNZEICHEN-KORREKTUR):
+    const SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdTOUA5sqMlTVxxUZWLn-ce3HNDvCbLfmLZIgT7EKJ0tYAT3OqZhx3T_BMvpgIwU5tDUxmjvUIRbHz/pub?gid=0&single=true&output=csv&csvdelim=%2C";
 
-    // Kaderliste für die automatische Zuordnung (Kleingeschrieben für die Suche)
     const teamKader = [
         "Jürgen Schützendorf", "Ludger Schledorn", "Markus Lenz", 
         "Niklas Weichert", "Andreas Denner", "Markus Ginsel", 
@@ -276,10 +268,6 @@
     ];
 
     document.addEventListener("DOMContentLoaded", function() {
-        if (SHEETS_CSV_URL === "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdTOUA5sqMlTVxxUZWLn-ce3HNDvCbLfmLZIgT7EKJ0tYAT3OqZhx3T_BMvpgIwU5tDUxmjvUIRbHz/pub?gid=0&single=true&output=csv") {
-            document.getElementById("loadingMessage").innerHTML = "⚠️ Bitte trage zuerst deine Google Sheets CSV-URL im HTML-Code ein!";
-            return;
-        }
         loadDataFromSheets();
     });
 
@@ -290,20 +278,28 @@
             const rows = parseCSV(dataText);
             
             if(rows.length <= 1) {
-                document.getElementById("loadingMessage").innerHTML = " Keine Daten im Google Sheet gefunden.";
+                document.getElementById("loadingMessage").innerHTML = "ℹ️ Die Tabelle ist aktuell noch leer. Bitte trage Daten ein.";
                 return;
             }
 
             processDartsData(rows);
         } catch (error) {
             console.error(error);
-            document.getElementById("loadingMessage").innerHTML = "⚠️ Fehler beim Laden der Google Sheets Daten. Überprüfe die Freigabe.";
+            document.getElementById("loadingMessage").innerHTML = "⚠️ Fehler beim Laden. Überprüfe, ob die Tabelle noch im Web veröffentlicht ist.";
         }
     }
 
-    // Robuster CSV Parser (behandelt Anführungszeichen korrekt)
+    // Intelligenter CSV Parser, der sowohl Komma als auch Semikolon versteht
     function parseCSV(text) {
         let lines = text.split(/\r?\n/);
+        if (lines.length === 0) return [];
+        
+        // Trennzeichen bestimmen (Semikolon oder Komma)
+        let delimiter = ",";
+        if (lines[0].includes(";")) {
+            delimiter = ";";
+        }
+
         return lines.map(line => {
             let result = [];
             let current = '';
@@ -312,7 +308,7 @@
                 let char = line[i];
                 if (char === '"') {
                     inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
+                } else if (char === delimiter && !inQuotes) {
                     result.push(current.trim());
                     current = '';
                 } else {
@@ -325,10 +321,7 @@
     }
 
     function processDartsData(rows) {
-        // Headers überspringen
         const dataRows = rows.slice(1);
-
-        // Datenstrukturen vorbereiten
         let spieltageMap = {};
         let spielerStats = {};
         
@@ -336,13 +329,7 @@
             spielerStats[p] = { shortGames: 0, hunderteachtziger: 0, highFinishes: [], topFinish: 0 };
         });
 
-        // Zeilen verarbeiten
         dataRows.forEach(row => {
-            // Spaltenzuordnung laut Tabellenvorlage:
-            // 0: Spieltag, 1: Datum, 2: Gegner Mannschaft, 3: Endergebnis, 
-            // 4: Block, 5: Spieler Kapellen, 6: Gegner Name, 7: Ergebnis Spiel, 
-            // 8: Avg, 9: Darts, 10: SG, 11: 180er, 12: HF
-            
             const spieltagNum = row[0];
             const datum = row[1];
             const gegnerTeam = row[2];
@@ -359,7 +346,6 @@
 
             if (!spieltagNum) return;
 
-            // 1. Spieltag-Struktur anlegen falls nicht existent
             if (!spieltageMap[spieltagNum]) {
                 spieltageMap[spieltagNum] = {
                     nummer: spieltagNum,
@@ -377,7 +363,6 @@
             let st = spieltageMap[spieltagNum];
             if (!st.bloecke[blockName]) st.bloecke[blockName] = [];
 
-            // Zeile zum Block hinzufügen
             st.bloecke[blockName].push({
                 spieler: spielerKapellen,
                 gegner: gegnerName,
@@ -391,12 +376,10 @@
                 ].filter(Boolean).join(", ") || "—"
             });
 
-            // Spieler für die Filterung erfassen (Sowohl Einzel- als auch Kombi-Namen bei Doppel auflösen)
             spielerKapellen.split("/").forEach(subP => {
                 let cleanName = subP.trim();
                 if(cleanName) st.alleSpieler.add(cleanName.toLowerCase());
                 
-                // Globale Spieler-Highlights aktualisieren, falls im Kader
                 let matchedKaderName = teamKader.find(tk => tk.toLowerCase() === cleanName.toLowerCase());
                 if (matchedKaderName) {
                     spielerStats[matchedKaderName].shortGames += sgCount;
@@ -420,13 +403,9 @@
             st.achtzigerGesamt += hunderteachtzigerCount;
         });
 
-        // Highlights-Tabelle oben rendern
         renderHighlightsTable(spielerStats);
-
-        // Spieltage rendern
         renderMatchdays(spieltageMap);
 
-        // UI Elemente einblenden, Lade-Info ausblenden
         document.getElementById("loadingMessage").style.display = "none";
         document.getElementById("highlightsCard").style.display = "block";
         document.getElementById("matchdaysHeading").style.display = "block";
@@ -437,7 +416,6 @@
         let sortedPlayers = teamKader.map(name => {
             return { name: name, ...stats[name] };
         }).sort((a, b) => {
-            // Sortierung: Meiste Short Games, dann meiste 180er, dann höchstes Finish
             if (b.shortGames !== a.shortGames) return b.shortGames - a.shortGames;
             if (b.hunderteachtziger !== a.hunderteachtziger) return b.hunderteachtziger - a.hunderteachtziger;
             return b.topFinish - a.topFinish;
@@ -470,15 +448,11 @@
         container.innerHTML = "";
         navLinks.innerHTML = "";
 
-        // Sortiert nach Spieltag-Nummer ausgeben
         let sortedKeys = Object.keys(spieltageMap).sort((a, b) => parseInt(a) - parseInt(b));
 
         sortedKeys.forEach(key => {
             let st = spieltageMap[key];
-            
-            // Navigationslink hinzufügen
             navLinks.innerHTML += `<a href="#spieltag-${st.nummer}">Spieltag ${st.nummer}</a>`;
-
             let playersDataAttr = Array.from(st.alleSpieler).join("||");
 
             let cardHtml = `
@@ -493,7 +467,6 @@
                     </div>
             `;
 
-            // Blöcke dynamisch rendern
             Object.keys(st.bloecke).forEach(blockTitle => {
                 cardHtml += `
                     <div class="block-title">${blockTitle}</div>
@@ -512,7 +485,6 @@
                 `;
 
                 st.bloecke[blockTitle].forEach(match => {
-                    // Erkennung ob gewonnen oder verloren für Zeilen-Farbklasse
                     let rowClass = "";
                     let scoreClass = "score-box";
                     
@@ -529,7 +501,6 @@
                         }
                     }
 
-                    // Attribute für Live-Suche präparieren
                     let searchRowPlayers = match.spieler.split("/").map(s => s.trim().toLowerCase()).join("||");
 
                     cardHtml += `
@@ -547,7 +518,6 @@
                 cardHtml += `</tbody></table>`;
             });
 
-            // Summary-Box am Ende der Card anhängen
             let topFinText = st.topFinish > 0 ? st.topFinish : "—";
             cardHtml += `
                     <div class="highlights-summary-box">
@@ -571,11 +541,8 @@
         });
     }
 
-    // Unveränderte, performante Live-Suchfunktion
     function performLiveSearch() {
         const query = document.getElementById('playerSearchInput').value.toLowerCase().trim();
-        
-        // 1. Suche in Highlight-Tabelle
         const hlRows = document.querySelectorAll('.hl-player-row');
         hlRows.forEach(row => {
             const name = row.getAttribute('data-player-name') || '';
@@ -590,11 +557,9 @@
             }
         });
 
-        // 2. Suche in Spieltag-Cards
         const cards = document.querySelectorAll('.card');
         cards.forEach(card => {
             const cardPlayers = card.getAttribute('data-players') || '';
-            
             if (query === '') {
                 card.style.display = 'block';
                 const rows = card.querySelectorAll('tbody tr');
