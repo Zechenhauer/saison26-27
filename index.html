@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saisonübersicht 3. Mannschaft — TV Kapellen 1919 e.V.</title>
+    <style>
+        /* Base & Theme Variables */
+        :root {
+            --bg-dark: #121826;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-green: #22c55e;
+            --accent-blue: #38bdf8;
+            --accent-red: #ef4444;
+            --accent-yellow: #eab308;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Loading */
+        #loadingMessage {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .nav-links a {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        .nav-links a:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        /* Card Layout */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            margin-bottom: 16px;
+            text-align: center;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 12px;
+        }
+
+        .spieltag-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* Venue Badge (Heim / Auswärts) */
+        .venue-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .venue-badge.home {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid #22c55e;
+        }
+        .venue-badge.away {
+            background-color: rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+            border: 1px solid #0284c7;
+        }
+
+        .matchday-title-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .team-badge {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .team-badge.winner { color: var(--accent-green); }
+        .team-badge.loser { color: var(--accent-red); }
+        .team-badge.draw { color: var(--accent-yellow); }
+        .team-badge.neutral { color: var(--text-main); }
+
+        .matchday-score {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: #0f172a;
+            padding: 4px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--card-border);
+        }
+
+        /* Block Title */
+        .block-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 16px 0 8px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px dashed var(--card-border);
+        }
+
+        /* Match Row */
+        .match-row {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            background-color: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .match-row:hover {
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .match-num {
+            width: 24px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .match-players {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .player-side {
+            flex: 1;
+        }
+        .player-side.left { text-align: right; }
+        .player-side.right { text-align: left; }
+        .player-side.winner { font-weight: bold; color: var(--accent-green); }
+
+        .score-tag {
+            background: #0f172a;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            border: 1px solid var(--card-border);
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .avg-tag {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .stats-icon {
+            margin-left: 8px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .modal-close {
+            position: absolute;
+            top: 12px; right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .modal-body p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        /* Stats Tables */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+        }
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loadingMessage">Daten werden aus Google Sheets geladen...</div>
+
+    <div id="navLinks" class="nav-links" style="display: none;"></div>
+
+    <div id="statsGrid" class="stats-grid" style="display: none;">
+        <div class="card">
+            <div class="block-title">Highlights</div>
+            <table id="highlightsTable">
+                <thead>
+                    <tr>
+                        <th>Spieler</th>
+                        <th>180er</th>
+                        <th>High Finish</th>
+                        <th>Short Games (&le;18)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="block-title">Scoring</div>
+            <table id="scoringTable">
+                <thead>
+                    <tr>
+                        <th>Spieler</th>
+                        <th>60+</th>
+                        <th>80+</th>
+                        <th>100+</th>
+                        <th>140+</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="spieltageContainer"></div>
+</div>
+
+<!-- Details Modal -->
+<div id="detailsModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModalDirect()">&times;</button>
+        <div id="modalBody" class="modal-body"></div>
+    </div>
+</div>
+
+<script>
+    // Konfiguration
+    const CSV_URL = "DEINE_GOOGLE_SHEETS_CSV_URL_HIER";
+    const teamKader = ["Spieler 1", "Spieler 2", "Spieler 3"]; // Namen der Spieler eintragen
+
+    let globalMatchStore = {};
+
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchData();
+    });
+
+    function fetchData() {
+        fetch(CSV_URL)
+            .then(res => res.text())
+            .then(csvText => {
+                const rows = parseCSV(csvText);
+                processDartsData(rows);
+            })
+            .catch(err => {
+                console.error("Fehler beim Laden:", err);
+                document.getElementById("loadingMessage").innerText = "Fehler beim Laden der Daten.";
+            });
+    }
+
+    function parseCSV(text) {
+        let lines = text.split(/\r\n|\n/);
+        return lines.map(line => {
+            let result = [];
+            let insideQuote = false;
+            let entry = "";
+            for (let i = 0; i < line.length; i++) {
+                let char = line[i];
+                if (char === '"') {
+                    insideQuote = !insideQuote;
+                } else if (char === ',' && !insideQuote) {
+                    result.push(entry.trim());
+                    entry = "";
+                } else {
+                    entry += char;
+                }
+            }
+            result.push(entry.trim());
+            return result;
+        });
+    }
+
+    function processDartsData(rows) {
+        const dataRows = rows.slice(1); // Erste Zeile (Überschriften) überspringen
+        let spieltageMap = {};
+        let spielerStats = {};
+        
+        teamKader.forEach(p => {
+            spielerStats[p] = { 
+                shortGames: 0, shortLegsArray: [], count140: 0, hunderteachtziger: 0, topFinish: 0,
+                s60: 0, s80: 0, s100: 0 
+            };
+        });
+
+        dataRows.forEach((row, idx) => {
+            // Zuordnung entsprechend deiner Tabellen-Spalten A bis R
+            const spieltagNum = row[0];             // Spalte A: Spieltag
+            const datum = row[1];                   // Spalte B: Datum
+            const gegnerTeam = row[2] || "Gegner";  // Spalte C: Gegner Mannschaft
+            
+            // Spalte D: Checkbox (TRUE/FALSE)
+            const isHomeRaw = row[3];
+            const isHome = String(isHomeRaw).trim().toUpperCase() === 'TRUE' || isHomeRaw === true || isHomeRaw === 1;
+
+            const endergebnis = row[4] || "";        // Spalte E: Endergebnis
+            const blockName = row[5] || "Spielblock";// Spalte F: Block
+            const spielerKapellen = row[6] || "";    // Spalte G: Spieler Kapellen
+            const gegnerName = row[7] || "";         // Spalte H: Gegner Name
+            const ergebnisSpiel = row[8] || "-:-";   // Spalte I: Ergebnis Spiel
+            const avg = row[9] || "";                // Spalte J: Avg
+            const dartsString = row[10] || "";       // Spalte K: Darts
+            // Spalte L (row[11]) ist "SG" (wird automatisch aus Darts berechnet)
+            const hunderteachtzigerRaw = row[12] || ""; // Spalte M: 180er
+            const hfString = row[13] || "";          // Spalte N: HF
+
+            // Scoring-Spalten
+            const score60 = parseInt(row[14]) || 0;  // Spalte O: 60+
+            const score80 = parseInt(row[15]) || 0;  // Spalte P: 80+
+            const score100 = parseInt(row[16]) || 0; // Spalte Q: 100+
+            const score140 = parseInt(row[17]) || 0; // Spalte R: 140+
+
+            if (!spieltagNum) return;
+
+            let autoShortLegs = 0;
+            let dartLegsArray = [];
+            let currentMatchShortLegs = [];
+
+            if (dartsString) {
+                let splitDarts = dartsString.split(/[,|\/-]/);
+                splitDarts.forEach(d => {
+                    let dNum = parseInt(d.trim());
+                    if (dNum) {
+                        dartLegsArray.push(dNum);
+                        if (dNum <= 18) {
+                            autoShortLegs++;
+                            currentMatchShortLegs.push(dNum);
+                        }
+                    }
+                });
+            }
+
+            let match180Count = 0;
+            if (hunderteachtzigerRaw.trim() !== "") {
+                let matchesNumbers = hunderteachtzigerRaw.match(/\d+/g);
+                if (matchesNumbers) {
+                    match180Count = matchesNumbers.reduce((acc, curr) => acc + parseInt(curr), 0);
+                } else {
+                    let textEntries = hunderteachtzigerRaw.split(/[,|\/]/).map(s => s.trim()).filter(s => s.length > 0);
+                    match180Count = textEntries.length;
+                }
+            }
+
+            if (!spieltageMap[spieltagNum]) {
+                spieltageMap[spieltagNum] = {
+                    nummer: spieltagNum, 
+                    datum: datum, 
+                    gegnerTeam: gegnerTeam,
+                    isHome: isHome,
+                    endergebnis: endergebnis, 
+                    bloecke: {}, 
+                    alleSpieler: new Set()
+                };
+            }
+
+            let st = spieltageMap[spieltagNum];
+            if (endergebnis && !st.endergebnis) st.endergebnis = endergebnis;
+            if (!st.bloecke[blockName]) st.bloecke[blockName] = [];
+
+            let matchObj = {
+                id: idx,
+                spieler: spielerKapellen, gegner: gegnerName, ergebnis: ergebnisSpiel,
+                avg: avg, dartsArray: dartLegsArray, dartsRaw: dartsString,
+                sgCount: autoShortLegs, achtzigerCount: match180Count, 
+                achtzigerRaw: hunderteachtzigerRaw,
+                hfString: hfString,
+                scoring: {
+                    s60: score60,
+                    s80: score80,
+                    s100: score100,
+                    s140: score140,
+                    s180: match180Count
+                }
+            };
+
+            st.bloecke[blockName].push(matchObj);
+
+            let beteiligteSpieler = spielerKapellen.split("/").map(s => s.trim()).filter(s => s !== "");
+            
+            beteiligteSpieler.forEach(subP => {
+                if(subP) st.alleSpieler.add(subP.toLowerCase());
+                
+                let matchedKaderName = teamKader.find(tk => tk.toLowerCase() === subP.toLowerCase());
+                if (matchedKaderName) {
+                    spielerStats[matchedKaderName].shortGames += autoShortLegs;
+                    spielerStats[matchedKaderName].shortLegsArray.push(...currentMatchShortLegs);
+
+                    spielerStats[matchedKaderName].count140 += score140;
+                    spielerStats[matchedKaderName].s60 += score60;
+                    spielerStats[matchedKaderName].s80 += score80;
+                    spielerStats[matchedKaderName].s100 += score100;
+                    
+                    if (hfString) {
+                        hfString.split(",").forEach(f => {
+                            let fNum = parseInt(f.trim());
+                            if (fNum && fNum > spielerStats[matchedKaderName].topFinish) {
+                                spielerStats[matchedKaderName].topFinish = fNum;
+                            }
+                        });
+                    }
+
+                    if (hunderteachtzigerRaw) {
+                        let rawLower = hunderteachtzigerRaw.toLowerCase();
+                        let playerLastName = matchedKaderName.split(" ").pop().toLowerCase();
+
+                        if (beteiligteSpieler.length > 1) {
+                            if (rawLower.includes(playerLastName)) {
+                                let numMatch = hunderteachtzigerRaw.match(new RegExp(playerLastName + "\\s*(\\d+)", "i"));
+                                let countToAdd = numMatch ? parseInt(numMatch[1]) : 1;
+                                spielerStats[matchedKaderName].hunderteachtziger += countToAdd;
+                            } else if (!isNaN(parseInt(hunderteachtzigerRaw)) && !rawLower.match(/[a-z]/i)) {
+                                spielerStats[matchedKaderName].hunderteachtziger += parseInt(hunderteachtzigerRaw);
+                            }
+                        } else {
+                            spielerStats[matchedKaderName].hunderteachtziger += match180Count;
+                        }
+                    }
+                }
+            });
+        });
+
+        renderHighlightsTable(spielerStats);
+        renderScoringTable(spielerStats);
+        renderMatchdays(spieltageMap);
+
+        document.getElementById("loadingMessage").style.display = "none";
+        document.getElementById("statsGrid").style.display = "grid";
+        document.getElementById("navLinks").style.display = "flex";
+    }
+
+    function renderMatchdays(spieltageMap) {
+        let container = document.getElementById("spieltageContainer");
+        let navLinks = document.getElementById("navLinks");
+        container.innerHTML = "";
+        navLinks.innerHTML = "";
+
+        let sortedKeys = Object.keys(spieltageMap).sort((a, b) => parseInt(b) - parseInt(a));
+
+        sortedKeys.forEach(key => {
+            let st = spieltageMap[key];
+            navLinks.innerHTML += `<a href="#spieltag-${st.nummer}">Spieltag ${st.nummer}</a>`;
+            let playersDataAttr = Array.from(st.alleSpieler).join("||");
+
+            let kapellenClass = "neutral";
+            let gegnerClass = "neutral";
+            let scoreDisplay = st.endergebnis || "-:-";
+
+            if (st.endergebnis && st.endergebnis.includes(":")) {
+                let parts = st.endergebnis.split(":");
+                let kapScore = parseInt(parts[0].trim());
+                let gegScore = parseInt(parts[1].trim());
+
+                if (!isNaN(kapScore) && !isNaN(gegScore)) {
+                    if (kapScore > gegScore) {
+                        kapellenClass = "winner"; gegnerClass = "loser";
+                    } else if (gegScore > kapScore) {
+                        kapellenClass = "loser"; gegnerClass = "winner";
+                    } else {
+                        kapellenClass = "draw"; gegnerClass = "draw";
+                    }
+                }
+            }
+
+            let venueBadgeHtml = st.isHome 
+                ? `<span class="venue-badge home">🏠 Heim</span>` 
+                : `<span class="venue-badge away">✈️ Auswärts</span>`;
+
+            let cardHtml = `
+                <div class="card" id="spieltag-${st.nummer}" data-players="${playersDataAttr}">
+                    <div class="card-header">
+                        <div class="spieltag-label">
+                            SPIELTAG ${st.nummer} ${st.datum ? '&bull; ' + st.datum : ''} ${venueBadgeHtml}
+                        </div>
+                        <div class="matchday-title-box">
+                            <span class="team-badge ${kapellenClass}">TV Kapellen 3</span>
+                            <span class="matchday-score">${scoreDisplay}</span>
+                            <span class="team-badge ${gegnerClass}">${st.gegnerTeam}</span>
+                        </div>
+                    </div>
+            `;
+
+            let matchCounter = 1;
+            Object.keys(st.bloecke).forEach(blockTitle => {
+                cardHtml += `<div class="block-title">${blockTitle}</div>`;
+
+                st.bloecke[blockTitle].forEach(match => {
+                    globalMatchStore[match.id] = match;
+                    
+                    let leftWins = false, rightWins = false;
+                    if (match.ergebnis && match.ergebnis.includes(":")) {
+                        let parts = match.ergebnis.split(":");
+                        if (parseInt(parts[0]) > parseInt(parts[1])) leftWins = true;
+                        else if (parseInt(parts[1]) > parseInt(parts[0])) rightWins = true;
+                    }
+
+                    let searchRowPlayers = match.spieler.split("/").map(s => s.trim().toLowerCase()).join("||");
+
+                    cardHtml += `
+                        <div class="match-row" data-row-players="${searchRowPlayers}" onclick="openModal(${match.id})">
+                            <div class="match-num">${matchCounter++}</div>
+                            <div class="match-players">
+                                <div class="player-side left ${leftWins ? 'winner' : ''}">
+                                    ${match.spieler} <span class="avg-tag">(${match.avg || '—'})</span>
+                                </div>
+                                <div class="score-tag">${match.ergebnis}</div>
+                                <div class="player-side right ${rightWins ? 'winner' : ''}">
+                                    ${match.gegner}
+                                </div>
+                            </div>
+                            <div class="stats-icon">📊</div>
+                        </div>
+                    `;
+                });
+            });
+
+            cardHtml += `</div>`;
+            container.innerHTML += cardHtml;
+        });
+    }
+
+    function renderHighlightsTable(stats) {
+        let tbody = document.querySelector("#highlightsTable tbody");
+        tbody.innerHTML = "";
+        Object.keys(stats).forEach(p => {
+            let s = stats[p];
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${p}</strong></td>
+                    <td>${s.hunderteachtziger || '-'}</td>
+                    <td>${s.topFinish ? s.topFinish : '-'}</td>
+                    <td>${s.shortGames ? s.shortGames + ' (' + s.shortLegsArray.join(', ') + ')' : '-'}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function renderScoringTable(stats) {
+        let tbody = document.querySelector("#scoringTable tbody");
+        tbody.innerHTML = "";
+        Object.keys(stats).forEach(p => {
+            let s = stats[p];
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${p}</strong></td>
+                    <td>${s.s60 || '-'}</td>
+                    <td>${s.s80 || '-'}</td>
+                    <td>${s.s100 || '-'}</td>
+                    <td>${s.count140 || '-'}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function openModal(id) {
+        let m = globalMatchStore[id];
+        if (!m) return;
+
+        let content = `
+            <h3>Match Details</h3>
+            <p><strong>Spieler:</strong> ${m.spieler}</p>
+            <p><strong>Gegner:</strong> ${m.gegner}</p>
+            <p><strong>Ergebnis:</strong> ${m.ergebnis}</p>
+            <p><strong>Average:</strong> ${m.avg || 'N/A'}</p>
+            <p><strong>Darts / Legs:</strong> ${m.dartsRaw || 'Keine Angabe'}</p>
+            <p><strong>180er:</strong> ${m.achtzigerRaw || '0'}</p>
+            <p><strong>High Finish:</strong> ${m.hfString || 'Keines'}</p>
+        `;
+
+        document.getElementById("modalBody").innerHTML = content;
+        document.getElementById("detailsModal").style.display = "flex";
+    }
+
+    function closeModal(e) {
+        if (e.target.id === "detailsModal") {
+            document.getElementById("detailsModal").style.display = "none";
+        }
+    }
+
+    function closeModalDirect() {
+        document.getElementById("detailsModal").style.display = "none";
+    }
+</script>
+
+</body>
+</html>
