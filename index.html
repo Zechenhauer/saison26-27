@@ -21,12 +21,34 @@
         margin-bottom: 20px;
         position: relative;
     }
+
+    /* Richtet Logo links, Überschrift & Logo rechts nebeneinander aus */
+    .header-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 4px;
+        width: 100%;
+    }
+
+    /* Erzwingt kompakte Größe für die Wappen/Logos */
+    .header-logo {
+        height: 45px;
+        max-height: 45px;
+        width: auto;
+        max-width: 50px;
+        object-fit: contain;
+        flex-shrink: 0;
+    }
+
     .app-main-header h1 {
         color: #f59e0b;
         font-size: 26px;
         font-weight: 900;
         margin: 0;
         letter-spacing: 1px;
+        text-transform: uppercase;
         text-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
     }
     .app-main-header .app-subtitle {
@@ -254,10 +276,17 @@
 </head>
 <body>
     <div class="container">
-        <!-- Hauptüberschrift mit Aktualisieren-Button -->
+        <!-- Hauptüberschrift mit Aktualisieren-Button & Logos -->
         <div class="app-main-header">
             <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">🔄 Daten aktualisieren</button>
-            <h1>TV Kapellen 1919 e.V. 3</h1>
+            
+            <!-- Zeile für Logo links, Titel und Logo rechts nebeneinander -->
+            <div class="header-title-row">
+                <img src="https://lh3.googleusercontent.com/d/1PB4X2QrrMlaRlajQEWDtJxRP2c6VTsI5" alt="TV Kapellen Logo" class="header-logo">
+                <h1>TV Kapellen 1919 e.V. 3</h1>
+                <img src="https://lh3.googleusercontent.com/d/1PB4X2QrrMlaRlajQEWDtJxRP2c6VTsI5" alt="TV Kapellen Logo" class="header-logo">
+            </div>
+
             <div class="app-subtitle">Saisonübersicht & Spieler-Statistiken</div>
             <div class="app-subtitle" style="font-size: 0.8rem; margin-top: 2px;">⚡ Datenpflege & Bereitstellung: Jürgen Schützendorf</div>
         </div>
@@ -674,7 +703,7 @@
                 let lowerTitle = blockTitle.toLowerCase();
                 let badgeClass = "block-default";
 
-                // Prüft präzise, womit der Blocktitel beginnt (verhindert Verwechslung durch "(2. Einzel)")
+                // Prüft präzise, womit der Blocktitel beginnt
                 if (lowerTitle.startsWith("1.") || lowerTitle.startsWith("1 ") || lowerTitle.includes("erster")) {
                     badgeClass = "block-1";
                 } else if (lowerTitle.includes("doppel")) {
