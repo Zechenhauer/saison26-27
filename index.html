@@ -674,13 +674,13 @@
                 let lowerTitle = blockTitle.toLowerCase();
                 let badgeClass = "block-default";
 
-                // Robuste Abfrage für alle 3 Blöcke
-                if (lowerTitle.includes("2. block") || lowerTitle.includes("2.einzel") || lowerTitle.includes("2. einzel") || lowerTitle.includes("zweiter")) {
-                    badgeClass = "block-2";
+                // Prüft präzise, womit der Blocktitel beginnt (verhindert Verwechslung durch "(2. Einzel)")
+                if (lowerTitle.startsWith("1.") || lowerTitle.startsWith("1 ") || lowerTitle.includes("erster")) {
+                    badgeClass = "block-1";
                 } else if (lowerTitle.includes("doppel")) {
                     badgeClass = "block-doppel";
-                } else if (lowerTitle.includes("1. block") || lowerTitle.includes("1.einzel") || lowerTitle.includes("1. einzel") || lowerTitle.includes("erster")) {
-                    badgeClass = "block-1";
+                } else if (lowerTitle.startsWith("2.") || lowerTitle.startsWith("2 ") || lowerTitle.includes("zweiter")) {
+                    badgeClass = "block-2";
                 }
 
                 cardHtml += `
