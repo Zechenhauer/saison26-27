@@ -166,34 +166,43 @@
         padding: 4px 14px; border-radius: 8px; border: 1px solid #334155;
     }
 
-    /* DEZENTE BLOCK-TITEL */
-    .block-title {
-        padding: 6px 14px; font-size: 11px;
-        font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    /* DEZENTE BADGES FÜR DIE BLOCK-TITEL */
+    .block-title-container {
+        background: #334155;
+        padding: 6px 12px;
+        border-bottom: 1px solid #1e293b;
+    }
+    .block-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 3px 10px;
+        border-radius: 6px;
     }
     
     /* 1. Einzelblock = Dezent Dunkelblau */
-    .block-title.block-1 {
-        background: #172554; color: #60a5fa; border-left: 4px solid #3b82f6;
+    .block-badge.block-1 {
+        background: #1e3a8a; color: #93c5fd; border: 1px solid #3b82f6;
     }
 
-    /* Doppelblock = Dezent Dunkelviolett */
-    .block-title.block-doppel {
-        background: #3b0764; color: #e879f9; border-left: 4px solid #c084fc;
+    /* Doppel-Block = Unauffälliges, schönes Dunkelrot */
+    .block-badge.block-doppel {
+        background: #7f1d1d; color: #fca5a5; border: 1px solid #ef4444;
     }
 
     /* 2. Einzelblock = Dezent Dunkelgrün */
-    .block-title.block-2 {
-        background: #022c22; color: #34d399; border-left: 4px solid #10b981;
+    .block-badge.block-2 {
+        background: #065f46; color: #a7f3d0; border: 1px solid #10b981;
     }
 
-    /* Fallback für sonstige Titel */
-    .block-title.block-default {
-        background: #334155; color: #f59e0b; border-left: 4px solid #f59e0b;
+    /* Fallback */
+    .block-badge.block-default {
+        background: #0f172a; color: #f59e0b; border: 1px solid #f59e0b;
     }
     
-    /* Match Row Styling (ohne Hintergrundfarbe) */
+    /* Match Row Styling */
     .match-row {
         display: flex; align-items: center; justify-content: space-between;
         padding: 12px 15px; border-bottom: 1px solid #334155; cursor: pointer;
@@ -663,17 +672,21 @@
             let matchCounter = 1;
             Object.keys(st.bloecke).forEach(blockTitle => {
                 let lowerTitle = blockTitle.toLowerCase();
-                let blockClass = "block-default";
+                let badgeClass = "block-default";
 
                 if (lowerTitle.includes("1. block") || lowerTitle.includes("1.einzel") || lowerTitle.includes("1. einzel")) {
-                    blockClass = "block-1";
+                    badgeClass = "block-1";
                 } else if (lowerTitle.includes("doppel")) {
-                    blockClass = "block-doppel";
+                    badgeClass = "block-doppel";
                 } else if (lowerTitle.includes("2. block") || lowerTitle.includes("2.einzel") || lowerTitle.includes("2. einzel")) {
-                    blockClass = "block-2";
+                    badgeClass = "block-2";
                 }
 
-                cardHtml += `<div class="block-title ${blockClass}">${blockTitle}</div>`;
+                cardHtml += `
+                    <div class="block-title-container">
+                        <span class="block-badge ${badgeClass}">${blockTitle}</span>
+                    </div>
+                `;
 
                 st.bloecke[blockTitle].forEach(match => {
                     globalMatchStore[match.id] = match;
