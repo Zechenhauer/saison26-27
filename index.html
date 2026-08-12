@@ -37,7 +37,7 @@
         letter-spacing: 0.5px;
     }
 
-    /* NEU: Styling für den Refresh-Button */
+    /* Refresh-Button Styling */
     .refresh-btn {
         position: absolute;
         top: 0;
@@ -89,7 +89,7 @@
 
     @media (max-width: 850px) {
         .dashboard-grid {
-            grid-template-columns: 1fr; /* Auf Handys/Tablets untereinander */
+            grid-template-columns: 1fr;
         }
         .refresh-btn {
             position: static;
@@ -111,13 +111,11 @@
     .data-table th { background-color: #334155; color: #94a3b8; text-align: left; padding: 8px 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
     .data-table td { padding: 8px 4px; border-bottom: 1px solid #334155; font-size: 12px; }
 
-    /* Farblich gestaltete Spalten für die Scoring-Tabelle */
     .col-60 { color: #f97316 !important; background-color: rgba(249, 115, 22, 0.1); font-weight: bold; }
     .col-80 { color: #facc15 !important; background-color: rgba(250, 204, 21, 0.1); font-weight: bold; }
     .col-100 { color: #4ade80 !important; background-color: rgba(74, 222, 128, 0.1); font-weight: bold; }
     .col-140 { background-color: rgba(56, 189, 248, 0.1); font-weight: bold; }
 
-    /* Spezial-Badge für 140+ */
     .badge-140 {
         background-color: #0284c7;
         color: #ffffff;
@@ -168,18 +166,49 @@
         padding: 4px 14px; border-radius: 8px; border: 1px solid #334155;
     }
 
+    /* FARBLICHE UNTERSCHEIDUNG FÜR DIE 3 SPIELBLÖCKE */
     .block-title {
-        background: #334155; color: #f59e0b; padding: 6px 12px; font-size: 12px;
-        font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;
+        padding: 8px 14px; font-size: 12px;
+        font-weight: 900; text-transform: uppercase; letter-spacing: 0.8px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     
-    /* Match Row */
+    /* 1. Einzelblock = Blau */
+    .block-title.block-1 {
+        background: #1e3a8a; color: #bfdbfe; border-left: 5px solid #3b82f6;
+    }
+    .match-row.row-block-1 {
+        background-color: rgba(30, 58, 138, 0.2);
+    }
+
+    /* Doppelblock = Violett / Lila */
+    .block-title.block-doppel {
+        background: #581c87; color: #f5d0fe; border-left: 5px solid #c084fc;
+    }
+    .match-row.row-block-doppel {
+        background-color: rgba(88, 28, 135, 0.25);
+    }
+
+    /* 2. Einzelblock = Grün */
+    .block-title.block-2 {
+        background: #065f46; color: #a7f3d0; border-left: 5px solid #10b981;
+    }
+    .match-row.row-block-2 {
+        background-color: rgba(6, 95, 70, 0.2);
+    }
+
+    /* Fallback für sonstige Titel */
+    .block-title.block-default {
+        background: #334155; color: #f59e0b; border-left: 5px solid #f59e0b;
+    }
+    
+    /* Match Row Styling */
     .match-row {
         display: flex; align-items: center; justify-content: space-between;
         padding: 12px 15px; border-bottom: 1px solid #334155; cursor: pointer;
         transition: background 0.15s ease;
     }
-    .match-row:hover { background-color: #334155; }
+    .match-row:hover { background-color: #334155 !important; }
     .match-num { width: 25px; color: #64748b; font-size: 12px; font-weight: bold; }
     .match-players { flex: 1; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; font-size: 14px; }
     .player-side { width: 42%; font-weight: 500; }
@@ -211,16 +240,13 @@
     .modal-table td { padding: 8px; border-bottom: 1px solid #334155; text-align: center; }
     .modal-table td.p-name { text-align: left; font-weight: bold; }
 
-    /* Styling für die Scoring-Tabelle im Pop-up */
     .scoring-header-row th {
         background-color: #991b1b !important;
         color: #ffffff !important;
         font-weight: bold;
         border: 1px solid #7f1d1d;
     }
-    .scoring-table-body td {
-        border: 1px solid #334155;
-    }
+    .scoring-table-body td { border: 1px solid #334155; }
 
     .row-faded { opacity: 0.2; }
     .row-matched { background-color: rgba(245, 158, 11, 0.15) !important; }
@@ -324,7 +350,6 @@
 
     document.addEventListener("DOMContentLoaded", loadDataFromSheets);
 
-    // NEU: Funktion für den Aktualisieren-Button
     async function refreshData() {
         const btn = document.getElementById("refreshBtn");
         if (btn) {
@@ -336,7 +361,6 @@
         document.getElementById("loadingMessage").innerText = "Aktualisiere Daten aus Google Sheets...";
 
         try {
-            // Re-Fetch der CSV Daten mit Cache-Buster Timestamp
             const cacheBusterUrl = SHEETS_CSV_URL + "&_ts=" + new Date().getTime();
             const response = await fetch(cacheBusterUrl);
             const dataText = await response.text();
@@ -422,7 +446,6 @@
             const hunderteachtzigerRaw = row[11] || "";
             const hfString = row[12] || "";
 
-            // Scoring-Spalten
             const score60 = parseInt(row[13]) || 0;
             const score80 = parseInt(row[14]) || 0;
             const score100 = parseInt(row[15]) || 0;
@@ -648,7 +671,23 @@
 
             let matchCounter = 1;
             Object.keys(st.bloecke).forEach(blockTitle => {
-                cardHtml += `<div class="block-title">${blockTitle}</div>`;
+                let lowerTitle = blockTitle.toLowerCase();
+                let blockClass = "block-default";
+                let rowBlockClass = "";
+
+                // Exakte Erkennung der Blöcke
+                if (lowerTitle.includes("1. block") || lowerTitle.includes("1.einzel") || lowerTitle.includes("1. einzel")) {
+                    blockClass = "block-1";
+                    rowBlockClass = "row-block-1";
+                } else if (lowerTitle.includes("doppel")) {
+                    blockClass = "block-doppel";
+                    rowBlockClass = "row-block-doppel";
+                } else if (lowerTitle.includes("2. block") || lowerTitle.includes("2.einzel") || lowerTitle.includes("2. einzel")) {
+                    blockClass = "block-2";
+                    rowBlockClass = "row-block-2";
+                }
+
+                cardHtml += `<div class="block-title ${blockClass}">${blockTitle}</div>`;
 
                 st.bloecke[blockTitle].forEach(match => {
                     globalMatchStore[match.id] = match;
@@ -663,7 +702,7 @@
                     let searchRowPlayers = match.spieler.split("/").map(s => s.trim().toLowerCase()).join("||");
 
                     cardHtml += `
-                        <div class="match-row" data-row-players="${searchRowPlayers}" onclick="openModal(${match.id})">
+                        <div class="match-row ${rowBlockClass}" data-row-players="${searchRowPlayers}" onclick="openModal(${match.id})">
                             <div class="match-num">${matchCounter++}</div>
                             <div class="match-players">
                                 <div class="player-side left ${leftWins ? 'winner' : ''}">
