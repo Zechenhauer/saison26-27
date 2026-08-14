@@ -32,13 +32,17 @@
         width: 100%;
     }
 
-    /* Erzwingt kompakte Größe für die Wappen/Logos */
+    /* Erzwingt runde Form mit orangenem Rahmen für die Wappen/Logos */
     .header-logo {
-        height: 45px;
-        max-height: 45px;
-        width: auto;
-        max-width: 50px;
+        width: 55px;   /* Falls es noch etwas größer sein soll, z. B. auf 60px oder 65px ändern */
+        height: 55px;  /* Gleicher Wert wie bei width für einen perfekten Kreis */
+        border-radius: 50%;
         object-fit: contain;
+        border: 2px solid #f59e0b; /* bzw. var(--accent-orange) */
+        background: #0f172a;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        padding: 4px;
+        box-sizing: border-box;
         flex-shrink: 0;
     }
 
