@@ -230,24 +230,6 @@
         background: #f59e0b;
         color: #0f172a;
     }
-    .delete-photo-btn {
-        position: absolute;
-        top: 6px;
-        right: 6px;
-        background: rgba(239, 68, 68, 0.9);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 26px;
-        height: 26px;
-        font-size: 12px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    }
-    .delete-photo-btn:hover { background: #dc2626; }
 
     .block-title-container {
         background: #334155;
@@ -809,20 +791,19 @@
                 });
             });
 
-            // Standard-Foto für Spieltag 1 hinterlegen (falls noch kein lokales Foto gespeichert ist)
+            // Gespeichertes Foto aus LocalStorage abrufen oder Standard für Spieltag 1
             let savedPhoto = localStorage.getItem(`tvk_spieltag_photo_${st.nummer}`);
             if (!savedPhoto && st.nummer == "1") {
                 savedPhoto = "https://lh3.googleusercontent.com/d/1OBM-wDXHhGhAws2nOQVZsoDzwmOC3LCB";
             }
 
-            // Mannschaftsfoto Bereich ganz unten in der Karte (unter dem letzten Spiel)
+            // Mannschaftsfoto Sektion unter dem letzten Spiel (ohne Löschen-Button)
             cardHtml += `
                 <div class="matchday-photo-section" id="photo-section-${st.nummer}">
                     <div id="photo-container-${st.nummer}">
                         ${savedPhoto ? `
                             <div class="photo-preview-container">
                                 <img src="${savedPhoto}" class="photo-preview" alt="Mannschaftsfoto Spieltag ${st.nummer}">
-                                <button class="delete-photo-btn" onclick="deleteSpieltagPhoto('${st.nummer}')" title="Foto löschen">×</button>
                             </div>
                         ` : `
                             <label class="photo-upload-btn">
@@ -852,25 +833,10 @@
             document.getElementById(`photo-container-${spieltagNum}`).innerHTML = `
                 <div class="photo-preview-container">
                     <img src="${base64Image}" class="photo-preview" alt="Mannschaftsfoto Spieltag ${spieltagNum}">
-                    <button class="delete-photo-btn" onclick="deleteSpieltagPhoto('${spieltagNum}')" title="Foto löschen">×</button>
                 </div>
             `;
         };
         reader.readAsDataURL(file);
-    }
-
-    // Foto löschen
-    function deleteSpieltagPhoto(spieltagNum) {
-        if (confirm("Möchtest du das Mannschaftsfoto für diesen Spieltag wirklich löschen?")) {
-            localStorage.removeItem(`tvk_spieltag_photo_${spieltagNum}`);
-            
-            document.getElementById(`photo-container-${spieltagNum}`).innerHTML = `
-                <label class="photo-upload-btn">
-                    📷 Mannschaftsfoto für Spieltag ${spieltagNum} hinzufügen
-                    <input type="file" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event, '${spieltagNum}')">
-                </label>
-            `;
-        }
     }
 
     function openModal(matchId) {
