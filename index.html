@@ -190,6 +190,65 @@
         padding: 4px 14px; border-radius: 8px; border: 1px solid #334155;
     }
 
+    /* Mannschaftsfoto Sektion unter dem letzten Spiel */
+    .matchday-photo-section {
+        background: #111827;
+        padding: 15px;
+        text-align: center;
+        border-top: 1px solid #334155;
+    }
+    .photo-preview-container {
+        position: relative;
+        display: inline-block;
+        max-width: 100%;
+        margin-top: 4px;
+    }
+    .photo-preview {
+        max-width: 100%;
+        max-height: 280px;
+        border-radius: 8px;
+        border: 2px solid #f59e0b;
+        object-fit: cover;
+        display: block;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .photo-upload-btn {
+        background: #334155;
+        color: #f8fafc;
+        border: 1px dashed #f59e0b;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s;
+    }
+    .photo-upload-btn:hover {
+        background: #f59e0b;
+        color: #0f172a;
+    }
+    .delete-photo-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .delete-photo-btn:hover { background: #dc2626; }
+
     .block-title-container {
         background: #334155;
         padding: 6px 12px;
@@ -469,7 +528,6 @@
 
             if (!spieltagNum) return;
 
-            // --- DOPPEL-ERKENNUNG DIREKT AM ANFANG ---
             let isDoppelMatch = blockName.toLowerCase().includes("doppel") || spielerKapellen.includes("/");
 
             if (!spieltageMap[spieltagNum]) {
@@ -524,18 +582,15 @@
 
             st.bloecke[blockName].push(matchObj);
 
-            // Beteiligte Spieler registrieren
             let beteiligteSpieler = spielerKapellen.split("/").map(s => s.trim()).filter(s => s !== "");
             beteiligteSpieler.forEach(subP => {
                 if(subP) st.alleSpieler.add(subP.toLowerCase());
             });
 
-            // WICHTIG: Wenn es ein Doppel ist, hier komplett abbrechen (keine Einzel-Statistiken)
             if (isDoppelMatch) {
                 return; 
             }
 
-            // --- AB HIER NUR REINE EINZEL-BERECHNUNG ---
             let isWin = false;
             let isLoss = false;
             if (ergebnisSpiel && ergebnisSpiel.includes(":")) {
@@ -754,9 +809,68 @@
                 });
             });
 
-            cardHtml += `</div>`;
+            // Standard-Foto für Spieltag 1 hinterlegen (falls noch kein lokales Foto gespeichert ist)
+            let savedPhoto = localStorage.getItem(`tvk_spieltag_photo_${st.nummer}`);
+            if (!savedPhoto && st.nummer == "1") {
+                savedPhoto = "https://lh3.googleusercontent.com/d/1OBM-wDXHhGhAws2nOQVZsoDzwmOC3LCB";
+            }
+
+            // Mannschaftsfoto Bereich ganz unten in der Karte (unter dem letzten Spiel)
+            cardHtml += `
+                <div class="matchday-photo-section" id="photo-section-${st.nummer}">
+                    <div id="photo-container-${st.nummer}">
+                        ${savedPhoto ? `
+                            <div class="photo-preview-container">
+                                <img src="${savedPhoto}" class="photo-preview" alt="Mannschaftsfoto Spieltag ${st.nummer}">
+                                <button class="delete-photo-btn" onclick="deleteSpieltagPhoto('${st.nummer}')" title="Foto löschen">×</button>
+                            </div>
+                        ` : `
+                            <label class="photo-upload-btn">
+                                📷 Mannschaftsfoto für Spieltag ${st.nummer} hinzufügen
+                                <input type="file" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event, '${st.nummer}')">
+                            </label>
+                        `}
+                    </div>
+                </div>
+            </div>`;
+            
             container.innerHTML += cardHtml;
         });
+    }
+
+    // Foto hochladen und im LocalStorage speichern
+    function handlePhotoUpload(event, spieltagNum) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Image = e.target.result;
+            localStorage.setItem(`tvk_spieltag_photo_${spieltagNum}`, base64Image);
+            
+            // Ansicht sofort aktualisieren
+            document.getElementById(`photo-container-${spieltagNum}`).innerHTML = `
+                <div class="photo-preview-container">
+                    <img src="${base64Image}" class="photo-preview" alt="Mannschaftsfoto Spieltag ${spieltagNum}">
+                    <button class="delete-photo-btn" onclick="deleteSpieltagPhoto('${spieltagNum}')" title="Foto löschen">×</button>
+                </div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Foto löschen
+    function deleteSpieltagPhoto(spieltagNum) {
+        if (confirm("Möchtest du das Mannschaftsfoto für diesen Spieltag wirklich löschen?")) {
+            localStorage.removeItem(`tvk_spieltag_photo_${spieltagNum}`);
+            
+            document.getElementById(`photo-container-${spieltagNum}`).innerHTML = `
+                <label class="photo-upload-btn">
+                    📷 Mannschaftsfoto für Spieltag ${spieltagNum} hinzufügen
+                    <input type="file" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event, '${spieltagNum}')">
+                </label>
+            `;
+        }
     }
 
     function openModal(matchId) {
