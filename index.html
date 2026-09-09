@@ -259,10 +259,23 @@
     .match-row:hover { background-color: #334155; }
     .match-num { width: 25px; color: #64748b; font-size: 12px; font-weight: bold; }
     .match-players { flex: 1; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; font-size: 14px; }
+    
     .player-side { width: 42%; font-weight: 500; }
     .player-side.left { text-align: right; }
     .player-side.right { text-align: left; }
-    .player-side.winner { color: #34d399; font-weight: bold; }
+    
+    /* Nur der Name bekommt das Kästchen */
+    .winner-name { 
+        color: #4ade80; 
+        font-weight: bold; 
+        background-color: rgba(22, 101, 52, 0.25);
+        border: 1px solid #22c55e;
+        padding: 2px 8px;
+        border-radius: 6px;
+        box-shadow: 0 0 8px rgba(34, 197, 94, 0.25);
+        display: inline-block;
+    }
+
     .avg-tag { color: #94a3b8; font-size: 12px; font-weight: normal; margin: 0 4px; }
     .score-tag { background: #0f172a; color: #f59e0b; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-family: monospace; font-size: 14px; border: 1px solid #334155; min-width: 45px; text-align: center; }
     .stats-icon { color: #34d399; font-size: 14px; margin-left: 10px; }
@@ -771,18 +784,27 @@
                         else if (parseInt(parts[1]) > parseInt(parts[0])) rightWins = true;
                     }
 
+                    let leftHtml = match.spieler;
+                    let rightHtml = match.gegner;
+
+                    if (leftWins) {
+                        leftHtml = `<span class="winner-name">${match.spieler}</span>`;
+                    } else if (rightWins) {
+                        rightHtml = `<span class="winner-name">${match.gegner}</span>`;
+                    }
+
                     let searchRowPlayers = match.spieler.split("/").map(s => s.trim().toLowerCase()).join("||");
 
                     cardHtml += `
                         <div class="match-row" data-row-players="${searchRowPlayers}" onclick="openModal(${match.id})">
                             <div class="match-num">${matchCounter++}</div>
                             <div class="match-players">
-                                <div class="player-side left ${leftWins ? 'winner' : ''}">
-                                    ${match.spieler} <span class="avg-tag">(${match.avg || '—'})</span>
+                                <div class="player-side left">
+                                    ${leftHtml} <span class="avg-tag">(${match.avg || '—'})</span>
                                 </div>
                                 <div class="score-tag">${match.ergebnis}</div>
-                                <div class="player-side right ${rightWins ? 'winner' : ''}">
-                                    ${match.gegner}
+                                <div class="player-side right">
+                                    ${rightHtml}
                                 </div>
                             </div>
                             <div class="stats-icon">📊</div>
@@ -797,7 +819,7 @@
                 savedPhoto = "https://lh3.googleusercontent.com/d/1OBM-wDXHhGhAws2nOQVZsoDzwmOC3LCB";
             }
 
-            // Mannschaftsfoto Sektion unter dem letzten Spiel (ohne Löschen-Button)
+            // Mannschaftsfoto Sektion unter dem letzten Spiel
             cardHtml += `
                 <div class="matchday-photo-section" id="photo-section-${st.nummer}">
                     <div id="photo-container-${st.nummer}">
@@ -829,7 +851,6 @@
             const base64Image = e.target.result;
             localStorage.setItem(`tvk_spieltag_photo_${spieltagNum}`, base64Image);
             
-            // Ansicht sofort aktualisieren
             document.getElementById(`photo-container-${spieltagNum}`).innerHTML = `
                 <div class="photo-preview-container">
                     <img src="${base64Image}" class="photo-preview" alt="Mannschaftsfoto Spieltag ${spieltagNum}">
