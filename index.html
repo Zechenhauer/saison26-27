@@ -502,7 +502,7 @@
 
                 st.bloecke[blockName].push(matchObj);
                 let beteiligte = m.spieler_kapellen.split("/").map(s => s.trim());
-                beteiligte.forEach(subP => { if(subP) st.alleSpieler.add(subP.toLowerCase()); });
+                beteiligigte.forEach(subP => { if(subP) st.alleSpieler.add(subP.toLowerCase()); });
 
                 let isDoppel = blockName.toLowerCase().includes("doppel") || m.spieler_kapellen.includes("/");
                 if (isDoppel) return;
@@ -514,7 +514,7 @@
                     if (p1 > p2) isWin = true; else if (p2 > p1) isLoss = true;
                 }
 
-                beteiligte.forEach(subP => {
+                beteiligigte.forEach(subP => {
                     let tk = teamKader.find(t => t.toLowerCase() === subP.toLowerCase());
                     if (tk) {
                         if (isWin) spielerStats[tk].siege++;
@@ -650,12 +650,14 @@
                     cardHtml += `<div class="match-row" onclick="openModal(${m.id})"><div class="match-num">${counter++}</div><div class="match-players"><div class="player-side left">${leftHtml} <span class="avg-tag">(${m.avg || '—'})</span></div><div class="score-tag">${m.ergebnis}</div><div class="player-side right">${rightHtml}</div></div><div class="stats-icon">📊</div></div>`;
                 });
             });
-            });
-            // 👉 Bild ganz unten in der Spieltag-Karte eingefügt
-            cardHtml += `
-                <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
-                    <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/2.te%20und%203te.png" alt="2. und 3. Mannschaft TV Kapellen" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
-                </div>`;
+
+            // 👉 Hier wird dein Supabase-Bild ganz unten unter den Ergebnissen eingebunden (wird für jede Spieltag-Card platziert)
+            if (st.nummer === 1 || Object.keys(map).length === 1) {
+                cardHtml += `
+                    <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
+                        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/2.te%20und%203te.png" alt="2. und 3. Mannschaft TV Kapellen" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
+                    </div>`;
+            }
 
             cardHtml += `</div>`;
             container.innerHTML += cardHtml;
