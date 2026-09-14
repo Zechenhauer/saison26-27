@@ -22,34 +22,6 @@
     .app-main-header h1 { color: #f59e0b; font-size: 26px; font-weight: 900; margin: 0; letter-spacing: 1px; text-transform: uppercase; }
     .app-main-header .app-subtitle { color: #94a3b8; font-size: 13px; font-weight: 600; margin-top: 4px; }
 
-    /* LIVE KARUSSELL STYLING */
-    .header-carousel-box {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 85px;
-        margin: 5px 0;
-    }
-    .carousel-avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        border: 2px solid #f59e0b;
-        object-fit: cover;
-        background-color: #000;
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-        transition: opacity 0.5s ease-in-out;
-    }
-    .carousel-name {
-        font-size: 12px;
-        font-weight: bold;
-        color: #f8fafc;
-        margin-top: 4px;
-        letter-spacing: 0.5px;
-        transition: opacity 0.5s ease-in-out;
-    }
-
     .top-controls { position: absolute; top: 0; right: 0; display: flex; gap: 8px; }
     .action-btn { background: transparent; border: 1px solid #f59e0b; color: #f59e0b; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
     .action-btn:hover { background: #f59e0b; color: #0f172a; }
@@ -92,6 +64,7 @@
     
     .matchday-score { font-size: 22px; font-weight: 900; color: #f59e0b; background: #1e293b; padding: 4px 14px; border-radius: 8px; border: 1px solid #334155; }
 
+    /* Dezente farbliche Unterscheidung der Blöcke */
     .block-title-container { background: #162032; padding: 8px 15px; border-bottom: 1px solid #334155; border-top: 1px solid #334155; }
     .block-badge { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; background: #1e293b; color: #94a3b8; border: 1px solid #475569; letter-spacing: 0.5px; }
     .block-badge.einzel-1 { border-left: 3px solid #38bdf8; color: #e2e8f0; }
@@ -153,16 +126,7 @@
             
             <div class="header-title-row">
                 <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/app-icon.png" alt="TV Kapellen Logo" class="header-logo">
-                
-                <div>
-                    <h1>TV Kapellen 1919 e.V. 3</h1>
-                    <!-- LIVE KARUSSELL -->
-                    <div class="header-carousel-box" id="headerCarousel">
-                        <img id="carouselImg" src="" alt="" class="carousel-avatar">
-                        <div id="carouselName" class="carousel-name"></div>
-                    </div>
-                </div>
-
+                <h1>TV Kapellen 1919 e.V. 3</h1>
                 <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/app-icon.png" alt="TV Kapellen Logo" class="header-logo">
             </div>
 
@@ -264,7 +228,9 @@
                         <div class="admin-grid-2">
                             <div class="admin-form-group">
                                 <label>Datum auswählen</label>
-                                <select id="newDatumSelect" onchange="onDateSelected()"></select>
+                                <select id="newDatumSelect" onchange="onDateSelected()">
+                                    <!-- Wird per JS befüllt -->
+                                </select>
                             </div>
                             <div class="admin-form-group">
                                 <label>Gegner Mannschaft</label>
@@ -366,57 +332,6 @@
         "Jürgen Schützendorf", "Markus Ginsel", "Thomas Kliver", "Leon Gerber", "Gregor Marek", "Markus Lenz", "Florian Hartwich", "Wolfram Senger", "Lars Neutag", "Ludger Schledorn", "Andreas Denner", "Niklas Weichert", "Michael Müller", "Yannick Steffes"
     ];
 
-    // SPIELER AVATAR URLS AUS SUPABASE STORAGE
-    const playerAvatars = {
-        "Andreas Denner": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Andreas%20Denner.png",
-        "Florian Hartwich": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Florian%20Hartwich.png",
-        "Gregor Marek": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/gregor%20marek.png",
-        "Jürgen Schützendorf": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Juergen%20Schuetzendorf.png",
-        "Lars Neutag": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/lars%20Neutag.png",
-        "Leon Gerber": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/leon%20gerber.png",
-        "Ludger Schledorn": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Ludger%20Schledorn.png",
-        "Markus Ginsel": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Markus%20Ginsel.png",
-        "Markus Lenz": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Markus%20Lenz.png",
-        "Michael Müller": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Michael%20Mueller.png",
-        "Niklas Weichert": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Niklas%20Weichert.png",
-        "Thomas Kliver": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Thomas%20Kliver.png",
-        "Wolfram Senger": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Wolfram%20Senger.png",
-        "Yannick Steffes": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/Yannick%20Steffes.png"
-    };
-
-    let carouselIndex = 0;
-    function startHeaderCarousel() {
-        const imgEl = document.getElementById("carouselImg");
-        const nameEl = document.getElementById("carouselName");
-        if (!imgEl || !nameEl) return;
-
-        function updateCarousel() {
-            let playerName = teamKader[carouselIndex];
-            let avatarUrl = playerAvatars[playerName] || "";
-            
-            imgEl.style.opacity = 0;
-            nameEl.style.opacity = 0;
-
-            setTimeout(() => {
-                if (avatarUrl) {
-                    imgEl.src = avatarUrl;
-                    imgEl.style.display = "block";
-                } else {
-                    imgEl.style.display = "none";
-                }
-                nameEl.textContent = playerName;
-
-                imgEl.style.opacity = 1;
-                nameEl.style.opacity = 1;
-
-                carouselIndex = (carouselIndex + 1) % teamKader.length;
-            }, 300);
-        }
-
-        updateCarousel();
-        setInterval(updateCarousel, 3000); // Wechsel alle 3 Sekunden
-    }
-
     const schedule = {
         "2026-09-05": "TV Kapellen 1919 e.V. 2",
         "2026-09-19": "The Red Lions Xanten 1",
@@ -445,7 +360,6 @@
         loadDataFromSupabase();
         initAdminDropdowns();
         onBlockChanged();
-        startHeaderCarousel();
     });
 
     function initAdminDropdowns() {
@@ -739,6 +653,7 @@
                 });
             });
 
+            // Bild beim 1. Spieltag ganz unten einfügen
             if (st.nummer === 1) {
                 cardHtml += `
                     <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
