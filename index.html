@@ -590,7 +590,7 @@
 
                 st.bloecke[blockName].push(matchObj);
                 let beteiligte = m.spieler_kapellen.split("/").map(s => s.trim());
-                beteiligigte.forEach(subP => { if(subP) st.alleSpieler.add(subP.toLowerCase()); });
+                beteiligte.forEach(subP => { if(subP) st.alleSpieler.add(subP.toLowerCase()); });
 
                 let isDoppel = blockName.toLowerCase().includes("doppel") || m.spieler_kapellen.includes("/");
                 if (isDoppel) return;
