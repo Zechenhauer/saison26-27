@@ -678,6 +678,14 @@
                     </div>`;
             }
 
+            // Bild beim 3. Spieltag ganz unten einfügen
+            if (st.nummer === 3) {
+                cardHtml += `
+                    <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
+                        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/3te%20i%20rumeln.png" alt="2. Spieltag TV Kapellen vs. Goch 3" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
+                    </div>`;
+            }
+
             cardHtml += `</div>`;
             container.innerHTML += cardHtml;
         });
