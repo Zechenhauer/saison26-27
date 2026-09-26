@@ -499,21 +499,29 @@
             let matches = stRow.matches || [];
 
             matches.forEach(m => {
-                let blockName = m.block_name || "1. Block";
-                if (!st.bloecke[blockName]) st.bloecke[blockName] = [];
+                let rawBlock = m.block_name || "1. Block";
+                
+                // Gruppiere sauber nach Hauptblock (unabhängig davon, welche Partie-Nummer angehängt wurde)
+                let cleanBlock = rawBlock;
+                if (rawBlock.includes("1. Block")) cleanBlock = "1. Block - Einzel (1-8)";
+                else if (rawBlock.includes("2. Block")) cleanBlock = "2. Block - Einzel (9-16)";
+                else if (rawBlock.toLowerCase().includes("doppel")) cleanBlock = "Doppel (1-4)";
+
+                if (!st.bloecke[cleanBlock]) st.bloecke[cleanBlock] = [];
 
                 let scoring = (m.scoring_stats && m.scoring_stats.length > 0) ? m.scoring_stats[0] : { score_60: 0, score_80: 0, score_100: 0, score_140: 0, score_180: 0, high_finish: 0 };
 
                 let matchObj = {
                     id: m.id, spieler: m.spieler_kapellen, gegner: m.gegner_name,
-                    ergebnis: m.ergebnis || "-:-", avg: m.avg || "", scoring: scoring, darts: m.darts || ""
+                    ergebnis: m.ergebnis || "-:-", avg: m.avg || "", scoring: scoring, darts: m.darts || "",
+                    blockNameRaw: rawBlock
                 };
 
-                st.bloecke[blockName].push(matchObj);
-                let beteiligte = m.spieler_kapellen.split("/").map(s => s.trim());
-                beteiligte.forEach(subP => { if(subP) st.alleSpieler.add(subP.toLowerCase()); });
+                st.bloecke[cleanBlock].push(matchObj);
+                let spielerListe = m.spieler_kapellen.split("/").map(s => s.trim());
+                spielerListe.forEach(subP => { if(subP) st.alleSpieler.add(subP.toLowerCase()); });
 
-                let isDoppel = blockName.toLowerCase().includes("doppel") || m.spieler_kapellen.includes("/");
+                let isDoppel = cleanBlock.toLowerCase().includes("doppel") || m.spieler_kapellen.includes("/");
                 if (isDoppel) return;
 
                 let isWin = false, isLoss = false;
@@ -523,7 +531,7 @@
                     if (p1 > p2) isWin = true; else if (p2 > p1) isLoss = true;
                 }
 
-                beteiligte.forEach(subP => {
+                spielerListe.forEach(subP => {
                     let tk = teamKader.find(t => t.toLowerCase() === subP.toLowerCase());
                     if (tk) {
                         if (isWin) spielerStats[tk].siege++;
@@ -545,6 +553,17 @@
                             }
                         }
                     }
+                });
+            });
+
+            // Sortierung der Partien innerhalb jedes Hauptblocks anhand der echten Partie-Nummer
+            Object.keys(st.bloecke).forEach(bTitle => {
+                st.bloecke[bTitle].sort((a, b) => {
+                    let getNum = (str) => {
+                        let match = str.match(/\((\D+)\s+(\d+)\)/);
+                        return match ? parseInt(match[2]) : 0;
+                    };
+                    return getNum(a.blockNameRaw) - getNum(b.blockNameRaw);
                 });
             });
         });
@@ -682,7 +701,7 @@
             if (st.nummer === 3) {
                 cardHtml += `
                     <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
-                        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/3te%20i%20rumeln.png" alt="2. Spieltag TV Kapellen vs. Goch 3" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
+                        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/3te%20i%20rumeln.png" alt="3. Spieltag TV Kapellen in Rumeln" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
                     </div>`;
             }
 
