@@ -705,6 +705,14 @@
                     </div>`;
             }
 
+            // Bild beim 4. Spieltag ganz unten einfügen
+            if (st.nummer === 4) {
+                cardHtml += `
+                    <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
+                        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/3te%20mannschaft%204%20spieltag.png" alt="3. Spieltag TV Kapellen in Rumeln" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
+                    </div>`;
+            }
+
             cardHtml += `</div>`;
             container.innerHTML += cardHtml;
         });
