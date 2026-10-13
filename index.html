@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saisonübersicht 3. Mannschaft — TV Kapellen 1919 e.V. (Supabase)</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
     * { box-sizing: border-box; }
     body {
@@ -28,8 +29,59 @@
     .action-btn.admin-btn { border-color: #38bdf8; color: #38bdf8; }
     .action-btn.admin-btn:hover { background: #38bdf8; color: #0f172a; }
 
-    .search-wrapper { position: sticky; top: 15px; z-index: 90; margin-bottom: 25px; display: flex; justify-content: center; }
-    .search-box-input { width: 100%; max-width: 500px; padding: 12px 24px; font-size: 14px; background-color: #1e293b; color: #ffffff; border: 2px solid #f59e0b; border-radius: 25px; outline: none; text-align: center; }
+    /* NEU: Suchfeld-Wrapper als Flexbox für Counter (links) und Diagramm-Button (rechts) */
+    .search-wrapper { position: sticky; top: 15px; z-index: 90; margin-bottom: 25px; display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap; }
+    .search-box-input { width: 100%; max-width: 450px; padding: 12px 24px; font-size: 14px; background-color: #1e293b; color: #ffffff; border: 2px solid #f59e0b; border-radius: 25px; outline: none; text-align: center; }
+
+    /* Links: Besucher-Counter Kachel */
+    .visitor-counter-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #1e293b;
+        border: 2px solid #334155;
+        padding: 10px 16px;
+        border-radius: 25px;
+    }
+    .visitor-counter-box .label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
+    .visitor-counter-box .count-value { font-size: 14px; color: #34d399; font-weight: bold; font-family: monospace; }
+
+    /* Rechts: Diagramm-Trigger Button */
+    .chart-trigger-btn {
+        background: #1e293b;
+        border: 2px solid #38bdf8;
+        color: #38bdf8;
+        padding: 10px 18px;
+        border-radius: 25px;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.2s;
+    }
+    .chart-trigger-btn:hover { background: #38bdf8; color: #0f172a; }
+
+    /* Diagramm Container Dropdown direkt unter der Suchleiste */
+    #visitorChartContainer {
+        display: none;
+        width: 100%;
+        max-width: 650px;
+        margin: 0 auto 25px auto;
+        background: #1e293b;
+        border: 2px solid #38bdf8;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    #visitorChartContainer h4 {
+        color: #38bdf8;
+        font-size: 13px;
+        text-transform: uppercase;
+        margin: 0 0 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
     .dashboard-grid { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 20px; margin-bottom: 35px; }
     @media (max-width: 950px) { .dashboard-grid { grid-template-columns: 1fr; } .top-controls { position: static; justify-content: center; margin-top: 10px; display: flex; } }
@@ -64,7 +116,6 @@
     
     .matchday-score { font-size: 22px; font-weight: 900; color: #f59e0b; background: #1e293b; padding: 4px 14px; border-radius: 8px; border: 1px solid #334155; }
 
-    /* Dezente farbliche Unterscheidung der Blöcke */
     .block-title-container { background: #162032; padding: 8px 15px; border-bottom: 1px solid #334155; border-top: 1px solid #334155; }
     .block-badge { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; background: #1e293b; color: #94a3b8; border: 1px solid #475569; letter-spacing: 0.5px; }
     .block-badge.einzel-1 { border-left: 3px solid #38bdf8; color: #e2e8f0; }
@@ -133,8 +184,23 @@
             <div class="app-subtitle">Saisonübersicht & Spieler-Statistiken (Supabase Live)</div>
         </div>
 
+        <!-- SUCHFELD MIT COUNTER (LINKS) UND DIAGRAMM-BUTTON (RECHTS) -->
         <div class="search-wrapper">
+            <div class="visitor-counter-box">
+                <span class="label">👁️ Aufrufe:</span>
+                <span id="totalVisitorCountDisplay" class="count-value">1</span>
+            </div>
             <input type="text" id="playerSearchInput" class="search-box-input" placeholder="🔍 Nach Spieler-Name suchen..." oninput="performLiveSearch()">
+            <button class="chart-trigger-btn" onclick="toggleVisitorChart()">📊 Diagramm</button>
+        </div>
+
+        <!-- AUFRUF-DIAGRAMM CONTAINER (KLAPPT SICH BEI KLICK AUF) -->
+        <div id="visitorChartContainer">
+            <h4>
+                <span>📈 Tägliche Seitenaufrufe (letzte 7 Tage)</span>
+                <span style="font-size: 11px; color: #94a3b8; cursor: pointer;" onclick="toggleVisitorChart()">✖ Schließen</span>
+            </h4>
+            <canvas id="visitorChart" style="max-height: 180px; width: 100%;"></canvas>
         </div>
 
         <div id="loadingMessage" style="text-align:center; color:#f59e0b; margin: 20px 0;">Lade Daten aus Supabase...</div>
@@ -365,7 +431,80 @@
         "Triple Inn Issum 2": ["Lukas Helmes", "Sarah Hillejan", "Simon Hillejan", "Thomas Liebenow", "Marcel Angenendt", "Hans-Willi Hollick", "Joshua Jäschke", "Stefan Hanauer", "Michael Heinen", "Stefan Klein", "Christoph Passens", "Karl-Heinz Grimm", "Daniel Moschüring", "Michael Delbeck", "Sascha Rudies"]
     };
 
+    let visitorChartInstance = null;
+    let isChartOpen = false;
+
+    // Besucherzähler & Diagramm-Logik
+    function trackVisitor() {
+        let today = new Date().toISOString().split('T')[0];
+        let visitorData = JSON.parse(localStorage.getItem('tvk_team3_visitor_stats') || '{}');
+        visitorData[today] = (visitorData[today] || 0) + 1;
+        localStorage.setItem('tvk_team3_visitor_stats', JSON.stringify(visitorData));
+
+        let totalVisits = Object.values(visitorData).reduce((a, b) => a + b, 0);
+        let displayElement = document.getElementById('totalVisitorCountDisplay');
+        if (displayElement) {
+            displayElement.innerText = totalVisits;
+        }
+    }
+
+    function toggleVisitorChart() {
+        let container = document.getElementById('visitorChartContainer');
+        isChartOpen = !isChartOpen;
+        if (isChartOpen) {
+            container.style.display = 'block';
+            renderVisitorChart();
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    function renderVisitorChart() {
+        let visitorData = JSON.parse(localStorage.getItem('tvk_team3_visitor_stats') || '{}');
+        let labels = [];
+        let dataValues = [];
+        
+        for (let i = 6; i >= 0; i--) {
+            let d = new Date();
+            d.setDate(d.getDate() - i);
+            let dateStr = d.toISOString().split('T')[0];
+            let displayLabel = d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+            
+            labels.push(displayLabel);
+            dataValues.push(visitorData[dateStr] || 0);
+        }
+
+        const ctx = document.getElementById('visitorChart').getContext('2d');
+        if (visitorChartInstance) {
+            visitorChartInstance.destroy();
+        }
+
+        visitorChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Seitenaufrufe',
+                    data: dataValues,
+                    backgroundColor: '#38bdf8',
+                    borderColor: '#0284c7',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#334155' } },
+                    y: { ticks: { color: '#94a3b8', font: { size: 10 }, stepSize: 1 }, grid: { color: '#334155' }, beginAtZero: true }
+                }
+            }
+        });
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
+        trackVisitor();
         loadDataFromSupabase();
         initAdminDropdowns();
         onBlockChanged();
@@ -501,7 +640,6 @@
             matches.forEach(m => {
                 let rawBlock = m.block_name || "1. Block";
                 
-                // Gruppiere sauber nach Hauptblock (unabhängig davon, welche Partie-Nummer angehängt wurde)
                 let cleanBlock = rawBlock;
                 if (rawBlock.includes("1. Block")) cleanBlock = "1. Block - Einzel (1-8)";
                 else if (rawBlock.includes("2. Block")) cleanBlock = "2. Block - Einzel (9-16)";
@@ -556,7 +694,6 @@
                 });
             });
 
-            // Sortierung der Partien innerhalb jedes Hauptblocks anhand der echten Partie-Nummer
             Object.keys(st.bloecke).forEach(bTitle => {
                 st.bloecke[bTitle].sort((a, b) => {
                     let getNum = (str) => {
@@ -681,35 +818,28 @@
                 });
             });
 
-            // Bild beim 1. Spieltag ganz unten einfügen
             if (st.nummer === 1) {
                 cardHtml += `
                     <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
                         <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/2.te%20und%203te.png" alt="2. und 3. Mannschaft TV Kapellen" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
                     </div>`;
             }
-
-            // Bild beim 2. Spieltag ganz unten einfügen
             if (st.nummer === 2) {
                 cardHtml += `
                     <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
                         <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/2.spiel-goch3.png" alt="2. Spieltag TV Kapellen vs. Goch 3" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
                     </div>`;
             }
-
-            // Bild beim 3. Spieltag ganz unten einfügen
             if (st.nummer === 3) {
                 cardHtml += `
                     <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
                         <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/Bilder/3te%20i%20rumeln.png" alt="3. Spieltag TV Kapellen in Rumeln" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
                     </div>`;
             }
-
-            // Bild beim 4. Spieltag ganz unten einfügen
             if (st.nummer === 4) {
                 cardHtml += `
                     <div style="padding: 15px; text-align: center; background: #162032; border-top: 1px solid #334155;">
-                        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/3te%20mannschaft%204%20spieltag.png" alt="3. Spieltag TV Kapellen in Rumeln" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
+                        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/3te%20mannschaft%204%20spieltag.png" alt="4. Spieltag Team 3" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #334155;">
                     </div>`;
             }
 
